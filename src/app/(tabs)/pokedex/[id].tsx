@@ -9,10 +9,12 @@ import {
 } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Image } from "expo-image";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useEffect, useState } from "react";
 import { fetchPokemonDetail, type PokemonDetail } from "../../../lib/pokemonApi";
 import { TYPE_COLORS } from "../../../constants/pokemonTypes";
 import { STAT_COLORS, STAT_LABELS } from "../../../constants/pokemonStats";
+import { useFavorites } from "../../../context/FavoritesContext";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
@@ -31,6 +33,7 @@ export default function PokemonDetailsScreen() {
   const [pokemon, setPokemon] = useState<PokemonDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   useEffect(() => {
     fetchPokemonDetail(Number(id))
@@ -92,6 +95,19 @@ export default function PokemonDetailsScreen() {
               </View>
             </View>
             <Image source={artwork} style={styles.artwork} contentFit="contain" />
+            <Pressable
+              style={styles.favoriteButton}
+              onPress={() =>
+                toggleFavorite({ id: pokemon.id, name: pokemon.name })
+              }
+              hitSlop={8}
+            >
+              <Ionicons
+                name={isFavorite(pokemon.id) ? "heart" : "heart-outline"}
+                size={28}
+                color="#fff"
+              />
+            </Pressable>
           </View>
 
           <View style={styles.body}>
@@ -176,6 +192,11 @@ const styles = StyleSheet.create({
     paddingLeft: 24,
     paddingRight: 12,
     minHeight: 180,
+  },
+  favoriteButton: {
+    position: "absolute",
+    top: 50,
+    right: 16,
   },
   headerInfo: { flex: 1, paddingBottom: 24 },
   pokemonNumber: {
